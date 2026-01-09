@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h2>Upload a new photo</h2>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <label for="file">Choose a JPG or PNG file (max 10 MB)</label>
+    <input type="file" name="file" id="file" accept="image/jpeg,image/png" required />
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
+    <button class="button" type="submit">Upload</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h2>Photo details</h2>
+  <img class="full" src="/uploads/{{ photo.filepath }}" alt="Photo {{ photo.filename }}" />
+  <p><strong>Uploaded:</strong> {{ photo.created_at }}</p>
+  <p><strong>Filename:</strong> {{ photo.filename }}</p>
+  <form action="/photo/{{ photo.id }}/analyze" method="post">
+    <button class="button" type="submit">Analyze this photo</button>
+  </form>
+</section>
+
+<section class="card">
+  <h3>Latest analysis</h3>
+  {% if analysis %}
+    {% if analysis.success %}
+      <pre>{{ analysis.json_text }}</pre>
+    {% else %}
+      <p class="warning">Analysis unavailable. {{ analysis.raw_text }}</p>
+    {% endif %}
+    <p class="meta">Model: {{ analysis.model }} | {{ analysis.created_at }}</p>
+  {% else %}
+    <p>No analysis yet. Click "Analyze this photo" to request suggestions.</p>
+  {% endif %}
+</section>
+{% endblock %}

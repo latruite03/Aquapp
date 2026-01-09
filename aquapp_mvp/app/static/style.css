@@ -1,0 +1,100 @@
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  margin: 0;
+  background: #f6f8fb;
+  color: #1f2a36;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.site-header {
+  background: #0f4c5c;
+  color: #fff;
+}
+
+.site-header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.site-header a {
+  color: #fff;
+  text-decoration: none;
+  margin-right: 16px;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 6px;
+  background: #0f4c5c;
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.button.secondary {
+  background: #556872;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.history-item img {
+  display: block;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.full {
+  width: 100%;
+  max-width: 640px;
+  border-radius: 10px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.error {
+  color: #b00020;
+  margin-top: 8px;
+}
+
+.warning {
+  color: #b00020;
+}
+
+.meta {
+  font-size: 0.9rem;
+  color: #556872;
+}
+
+pre {
+  background: #f0f4f8;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
