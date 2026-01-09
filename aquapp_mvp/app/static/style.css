@@ -1,7 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Serif+4:wght@400;600&display=swap");
+
 body {
-  font-family: "Segoe UI", Arial, sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   margin: 0;
-  background: #f6f8fb;
+  background: linear-gradient(180deg, #f6f8fb 0%, #eef4f7 100%);
   color: #1f2a36;
 }
 
@@ -12,8 +14,9 @@ body {
 }
 
 .site-header {
-  background: #0f4c5c;
+  background: linear-gradient(120deg, #0f4c5c, #1b7b8f);
   color: #fff;
+  box-shadow: 0 6px 18px rgba(15, 76, 92, 0.25);
 }
 
 .site-header .container {
@@ -26,25 +29,32 @@ body {
   color: #fff;
   text-decoration: none;
   margin-right: 16px;
+  font-weight: 600;
 }
 
 .card {
   background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(15, 76, 92, 0.12);
   margin-bottom: 24px;
 }
 
 .button {
   display: inline-block;
   padding: 10px 18px;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #0f4c5c;
   color: #fff;
   text-decoration: none;
   border: none;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(15, 76, 92, 0.2);
 }
 
 .button.secondary {
@@ -68,6 +78,31 @@ body {
   display: block;
   border-radius: 8px;
   margin-bottom: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stacked-form {
+  display: grid;
+  gap: 12px;
+}
+
+.stacked-form input,
+.stacked-form textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d7e0ea;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.stacked-form input:focus,
+.stacked-form textarea:focus {
+  outline: 2px solid rgba(15, 76, 92, 0.2);
+  border-color: #1b7b8f;
+}
+
+.muted {
+  color: #5b6b77;
 }
 
 .full {
@@ -90,6 +125,18 @@ body {
 .meta {
   font-size: 0.9rem;
   color: #556872;
+}
+
+.analysis-text {
+  font-family: "Source Serif 4", "Georgia", serif;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: #20323f;
+  white-space: pre-line;
+  background: #f8fbfd;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 76, 92, 0.1);
 }
 
 pre {

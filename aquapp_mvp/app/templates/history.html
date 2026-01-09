@@ -2,7 +2,7 @@
 
 {% block content %}
 <section class="card">
-  <h2>Photo history</h2>
+  <h2>Historique des photos</h2>
   {% if photos %}
     <div class="history-grid">
       {% for photo in photos %}
@@ -11,12 +11,12 @@
             <img src="/uploads/{{ photo.filepath }}" alt="Photo {{ photo.filename }}" width="200" />
           </a>
           <p>{{ photo.created_at }}</p>
-          <a href="/photo/{{ photo.id }}">View details</a>
+          <a href="/photo/{{ photo.id }}">Voir les détails</a>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <p>No uploads yet.</p>
+    <p>Aucun téléversement pour l'instant.</p>
   {% endif %}
 </section>
 {% endblock %}

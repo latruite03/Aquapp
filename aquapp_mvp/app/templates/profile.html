@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h2>Profil de l'aquarium</h2>
+  <p class="muted">Ces informations sont ajoutées automatiquement au contexte de chaque analyse.</p>
+  <form action="/profile" method="post" class="stacked-form">
+    <label for="name">Nom de l'aquarium (optionnel)</label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      value="{{ profile.name if profile else '' }}"
+      placeholder="Ex: AquaSalon"
+    />
+
+    <label for="volume_liters">Volume en litres</label>
+    <input
+      type="number"
+      id="volume_liters"
+      name="volume_liters"
+      min="1"
+      value="{{ profile.volume_liters if profile else '' }}"
+      placeholder="Ex: 120"
+    />
+
+    <label for="inhabitants">Population / espèces</label>
+    <textarea
+      id="inhabitants"
+      name="inhabitants"
+      rows="3"
+      placeholder="Ex: 8 néons, 2 corydoras, 1 betta"
+    >{{ profile.inhabitants if profile else '' }}</textarea>
+
+    <label for="equipment">Équipement</label>
+    <textarea
+      id="equipment"
+      name="equipment"
+      rows="3"
+      placeholder="Ex: Filtre externe, chauffage 200W, CO2"
+    >{{ profile.equipment if profile else '' }}</textarea>
+
+    <label for="parameters">Paramètres de l'eau</label>
+    <textarea
+      id="parameters"
+      name="parameters"
+      rows="3"
+      placeholder="Ex: pH 7.2, GH 6, KH 4, 24°C"
+    >{{ profile.parameters if profile else '' }}</textarea>
+
+    <label for="goals">Objectifs</label>
+    <textarea
+      id="goals"
+      name="goals"
+      rows="2"
+      placeholder="Ex: Améliorer la clarté, réduire les algues"
+    >{{ profile.goals if profile else '' }}</textarea>
+
+    <label for="notes">Notes complémentaires</label>
+    <textarea
+      id="notes"
+      name="notes"
+      rows="3"
+      placeholder="Ex: Traitement anti-algues il y a 2 semaines"
+    >{{ profile.notes if profile else '' }}</textarea>
+
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <button class="button" type="submit">Enregistrer le profil</button>
+  </form>
+</section>
+{% endblock %}
