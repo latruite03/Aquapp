@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aquapp MVP</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1><a href="/">Aquapp MVP</a></h1>
+      <nav>
+        <a href="/upload">Upload</a>
+        <a href="/history">History</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}
+    {{ content | safe }}
+    {% endblock %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h2>Local-first aquarium monitoring</h2>
+  <p>Upload aquarium photos, keep a history, and request cautious analysis suggestions.</p>
+</section>
+
+<section class="card">
+  <h3>Latest photo</h3>
+  {% if photo %}
+    <div class="photo-grid">
+      <img src="/uploads/{{ photo.filepath }}" alt="Latest upload" width="200" />
+      <div>
+        <p><strong>Uploaded:</strong> {{ photo.created_at }}</p>
+        <a class="button" href="/photo/{{ photo.id }}">View</a>
+        <a class="button secondary" href="/upload">Upload new photo</a>
+      </div>
+    </div>
+  {% else %}
+    <p>No photos yet. Upload your first image to get started.</p>
+    <a class="button" href="/upload">Upload a photo</a>
+  {% endif %}
+</section>
+{% endblock %}
