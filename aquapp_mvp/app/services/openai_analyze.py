@@ -25,6 +25,8 @@ USER_PROMPT = (
     "dans un ton bienveillant et clair. N'inclus pas de JSON ni de code. "
     "Base-toi sur la photo, le commentaire éventuel, le profil de l'aquarium "
     "et l'historique fourni pour garder le contexte général."
+    "Base-toi sur la photo, le commentaire éventuel, et l'historique fourni "
+    "pour garder le contexte général de l'aquarium."
 )
 
 
