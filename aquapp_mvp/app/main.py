@@ -77,7 +77,7 @@ async def upload_photo(
             "upload.html",
             {
                 "request": request,
-                "error": "Comment exceeds 1000 characters.",
+                "error": "Le commentaire dépasse 1000 caractères.",
                 "comment": comment,
             },
             status_code=400,
@@ -89,7 +89,7 @@ async def upload_photo(
             "upload.html",
             {
                 "request": request,
-                "error": "Only JPG and PNG images are allowed.",
+                "error": "Seuls les fichiers JPG et PNG sont autorisés.",
                 "comment": comment,
             },
             status_code=400,
@@ -101,7 +101,7 @@ async def upload_photo(
             "upload.html",
             {
                 "request": request,
-                "error": "File exceeds 10 MB limit.",
+                "error": "Le fichier dépasse la limite de 10 Mo.",
                 "comment": comment,
             },
             status_code=400,
@@ -177,7 +177,7 @@ def photo_detail(request: Request, photo_id: str):
         conn.close()
 
     if not photo:
-        raise HTTPException(status_code=404, detail="Photo not found")
+        raise HTTPException(status_code=404, detail="Photo introuvable")
 
     return templates.TemplateResponse(
         "photo.html",
@@ -196,14 +196,41 @@ def analyze(photo_id: str):
         photo = conn.execute(
             "SELECT * FROM photos WHERE id = ?", (photo_id,)
         ).fetchone()
+        history_rows = conn.execute(
+            """
+            SELECT analyses.created_at, analyses.raw_text, photos.user_comment
+            FROM analyses
+            JOIN photos ON photos.id = analyses.photo_id
+            WHERE analyses.success = 1
+            ORDER BY analyses.created_at DESC
+            LIMIT 5
+            """
+        ).fetchall()
     finally:
         conn.close()
 
     if not photo:
-        raise HTTPException(status_code=404, detail="Photo not found")
+        raise HTTPException(status_code=404, detail="Photo introuvable")
 
     image_path = UPLOAD_DIR / photo["filepath"]
-    result = analyze_image(image_path, photo["filename"], photo["user_comment"])
+    history = []
+    for row in history_rows:
+        created_at = row["created_at"]
+        raw_text = row["raw_text"]
+        comment = row["user_comment"]
+        if not raw_text:
+            continue
+        parts = [f"Analyse du {created_at}:"]
+        if comment:
+            parts.append(f"Commentaire: {comment}")
+        parts.append(raw_text)
+        history.append("\n".join(parts))
+    result = analyze_image(
+        image_path,
+        photo["filename"],
+        photo["user_comment"],
+        history=history or None,
+    )
     analysis_id = str(uuid4())
     created_at = datetime.utcnow().isoformat()
 
@@ -240,7 +267,7 @@ def not_found(request: Request, exc: HTTPException):
         "base.html",
         {
             "request": request,
-            "content": "<h2>Not Found</h2><p>The page you requested does not exist.</p>",
+        "content": "<h2>Page introuvable</h2><p>La page demandée n'existe pas.</p>",
         },
         status_code=404,
     )
