@@ -23,6 +23,8 @@ SYSTEM_PROMPT = (
 USER_PROMPT = (
     "Réponds en français avec un texte continu (2 à 4 paragraphes) "
     "dans un ton bienveillant et clair. N'inclus pas de JSON ni de code. "
+    "Base-toi sur la photo, le commentaire éventuel, le profil de l'aquarium "
+    "et l'historique fourni pour garder le contexte général."
     "Base-toi sur la photo, le commentaire éventuel, et l'historique fourni "
     "pour garder le contexte général de l'aquarium."
 )
@@ -52,6 +54,7 @@ def analyze_image(
     filename: str,
     comment: str | None = None,
     history: list[str] | None = None,
+    profile_summary: str | None = None,
 ) -> AnalysisResult:
     env_path = _ensure_env_loaded()
     if env_path:
@@ -81,6 +84,13 @@ def analyze_image(
         if comment and comment.strip():
             content.append(
                 {"type": "text", "text": f"Commentaire/question: {comment.strip()}"}
+            )
+        if profile_summary:
+            content.append(
+                {
+                    "type": "text",
+                    "text": "Profil de l'aquarium:\n" + profile_summary,
+                }
             )
         if history:
             history_text = "\n\n".join(history)

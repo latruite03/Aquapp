@@ -53,9 +53,14 @@ def home(request: Request):
         row = conn.execute(
             "SELECT * FROM photos ORDER BY created_at DESC LIMIT 1"
         ).fetchone()
+        profile = conn.execute(
+            "SELECT * FROM aquarium_profile WHERE id = 1"
+        ).fetchone()
     finally:
         conn.close()
-    return templates.TemplateResponse("index.html", {"request": request, "photo": row})
+    return templates.TemplateResponse(
+        "index.html", {"request": request, "photo": row, "profile": profile}
+    )
 
 
 @app.get("/upload", response_class=HTMLResponse)
@@ -63,6 +68,87 @@ def upload_form(request: Request):
     return templates.TemplateResponse(
         "upload.html", {"request": request, "error": None, "comment": ""}
     )
+
+
+@app.get("/profile", response_class=HTMLResponse)
+def profile_form(request: Request):
+    conn = get_connection()
+    try:
+        profile = conn.execute(
+            "SELECT * FROM aquarium_profile WHERE id = 1"
+        ).fetchone()
+    finally:
+        conn.close()
+    return templates.TemplateResponse(
+        "profile.html",
+        {"request": request, "profile": profile, "error": None},
+    )
+
+
+@app.post("/profile")
+def save_profile(
+    request: Request,
+    name: str = Form(""),
+    volume_liters: int | None = Form(None),
+    inhabitants: str = Form(""),
+    equipment: str = Form(""),
+    parameters: str = Form(""),
+    goals: str = Form(""),
+    notes: str = Form(""),
+):
+    payload = {
+        "name": name.strip() or None,
+        "volume_liters": volume_liters,
+        "inhabitants": inhabitants.strip() or None,
+        "equipment": equipment.strip() or None,
+        "parameters": parameters.strip() or None,
+        "goals": goals.strip() or None,
+        "notes": notes.strip() or None,
+    }
+    if volume_liters is not None and volume_liters <= 0:
+        return templates.TemplateResponse(
+            "profile.html",
+            {
+                "request": request,
+                "profile": payload,
+                "error": "Le volume doit être un nombre positif.",
+            },
+            status_code=400,
+        )
+    updated_at = datetime.utcnow().isoformat()
+    conn = get_connection()
+    try:
+        conn.execute(
+            """
+            INSERT INTO aquarium_profile (
+                id, updated_at, name, volume_liters, inhabitants, equipment, parameters, goals, notes
+            )
+            VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                updated_at = excluded.updated_at,
+                name = excluded.name,
+                volume_liters = excluded.volume_liters,
+                inhabitants = excluded.inhabitants,
+                equipment = excluded.equipment,
+                parameters = excluded.parameters,
+                goals = excluded.goals,
+                notes = excluded.notes
+            """,
+            (
+                updated_at,
+                payload["name"],
+                payload["volume_liters"],
+                payload["inhabitants"],
+                payload["equipment"],
+                payload["parameters"],
+                payload["goals"],
+                payload["notes"],
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return RedirectResponse(url="/profile", status_code=303)
 
 
 @app.post("/upload")
@@ -196,6 +282,9 @@ def analyze(photo_id: str):
         photo = conn.execute(
             "SELECT * FROM photos WHERE id = ?", (photo_id,)
         ).fetchone()
+        profile = conn.execute(
+            "SELECT * FROM aquarium_profile WHERE id = 1"
+        ).fetchone()
         history_rows = conn.execute(
             """
             SELECT analyses.created_at, analyses.raw_text, photos.user_comment
@@ -211,6 +300,26 @@ def analyze(photo_id: str):
 
     if not photo:
         raise HTTPException(status_code=404, detail="Photo introuvable")
+
+    profile_summary = None
+    if profile:
+        summary_parts = []
+        if profile["name"]:
+            summary_parts.append(f"Nom: {profile['name']}")
+        if profile["volume_liters"]:
+            summary_parts.append(f"Volume: {profile['volume_liters']} L")
+        if profile["inhabitants"]:
+            summary_parts.append(f"Population: {profile['inhabitants']}")
+        if profile["equipment"]:
+            summary_parts.append(f"Équipement: {profile['equipment']}")
+        if profile["parameters"]:
+            summary_parts.append(f"Paramètres: {profile['parameters']}")
+        if profile["goals"]:
+            summary_parts.append(f"Objectifs: {profile['goals']}")
+        if profile["notes"]:
+            summary_parts.append(f"Notes: {profile['notes']}")
+        if summary_parts:
+            profile_summary = " | ".join(summary_parts)
 
     image_path = UPLOAD_DIR / photo["filepath"]
     history = []
@@ -230,6 +339,7 @@ def analyze(photo_id: str):
         photo["filename"],
         photo["user_comment"],
         history=history or None,
+        profile_summary=profile_summary,
     )
     analysis_id = str(uuid4())
     created_at = datetime.utcnow().isoformat()

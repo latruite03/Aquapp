@@ -45,6 +45,17 @@ def init_db() -> None:
                 success INTEGER,
                 FOREIGN KEY(photo_id) REFERENCES photos(id)
             );
+            CREATE TABLE IF NOT EXISTS aquarium_profile (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                updated_at TEXT,
+                name TEXT,
+                volume_liters INTEGER,
+                inhabitants TEXT,
+                equipment TEXT,
+                parameters TEXT,
+                goals TEXT,
+                notes TEXT
+            );
             """
         )
         if not _column_exists(conn, "photos", "user_comment"):

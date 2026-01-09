@@ -81,6 +81,30 @@ body {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
+.stacked-form {
+  display: grid;
+  gap: 12px;
+}
+
+.stacked-form input,
+.stacked-form textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d7e0ea;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.stacked-form input:focus,
+.stacked-form textarea:focus {
+  outline: 2px solid rgba(15, 76, 92, 0.2);
+  border-color: #1b7b8f;
+}
+
+.muted {
+  color: #5b6b77;
+}
+
 .full {
   width: 100%;
   max-width: 640px;

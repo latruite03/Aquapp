@@ -4,6 +4,12 @@
 <section class="card">
   <h2>Suivi local de votre aquarium</h2>
   <p>Ajoutez des photos, gardez un historique et recevez des conseils d'observation prudents.</p>
+  {% if profile %}
+    <p class="muted">Profil chargé : {{ profile.name or "Aquarium principal" }}.</p>
+  {% else %}
+    <p class="muted">Aucun profil renseigné. Ajoutez vos informations pour des analyses plus précises.</p>
+    <a class="button secondary" href="/profile">Créer le profil</a>
+  {% endif %}
 </section>
 
 <section class="card">
