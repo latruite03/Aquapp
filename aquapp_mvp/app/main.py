@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -24,7 +24,15 @@ ALLOWED_TYPES = {"image/jpeg", "image/png"}
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 MAX_SIZE_BYTES = 10 * 1024 * 1024
 
-load_dotenv(dotenv_path=BASE_DIR / ".env", override=False)
+def _load_env() -> None:
+    candidates = [BASE_DIR / ".env", BASE_DIR.parent / ".env"]
+    for path in candidates:
+        if path.is_file():
+            load_dotenv(dotenv_path=path, override=False)
+            break
+
+
+_load_env()
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=BASE_DIR / "app" / "static"), name="static")
@@ -53,18 +61,37 @@ def home(request: Request):
 @app.get("/upload", response_class=HTMLResponse)
 def upload_form(request: Request):
     return templates.TemplateResponse(
-        "upload.html", {"request": request, "error": None}
+        "upload.html", {"request": request, "error": None, "comment": ""}
     )
 
 
 @app.post("/upload")
-async def upload_photo(request: Request, file: UploadFile = File(...)):
+async def upload_photo(
+    request: Request,
+    file: UploadFile = File(...),
+    comment: str = Form(""),
+):
+    comment_clean = comment.strip()
+    if len(comment_clean) > 1000:
+        return templates.TemplateResponse(
+            "upload.html",
+            {
+                "request": request,
+                "error": "Comment exceeds 1000 characters.",
+                "comment": comment,
+            },
+            status_code=400,
+        )
     filename = file.filename or ""
     extension = Path(filename).suffix.lower()
     if file.content_type not in ALLOWED_TYPES or extension not in ALLOWED_EXTENSIONS:
         return templates.TemplateResponse(
             "upload.html",
-            {"request": request, "error": "Only JPG and PNG images are allowed."},
+            {
+                "request": request,
+                "error": "Only JPG and PNG images are allowed.",
+                "comment": comment,
+            },
             status_code=400,
         )
 
@@ -72,7 +99,11 @@ async def upload_photo(request: Request, file: UploadFile = File(...)):
     if len(data) > MAX_SIZE_BYTES:
         return templates.TemplateResponse(
             "upload.html",
-            {"request": request, "error": "File exceeds 10 MB limit."},
+            {
+                "request": request,
+                "error": "File exceeds 10 MB limit.",
+                "comment": comment,
+            },
             status_code=400,
         )
 
@@ -91,8 +122,10 @@ async def upload_photo(request: Request, file: UploadFile = File(...)):
     try:
         conn.execute(
             """
-            INSERT INTO photos (id, created_at, source, filename, filepath, content_type)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO photos (
+                id, created_at, source, filename, filepath, content_type, user_comment
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 photo_id,
@@ -101,6 +134,7 @@ async def upload_photo(request: Request, file: UploadFile = File(...)):
                 filename,
                 relative_path,
                 file.content_type,
+                comment_clean or None,
             ),
         )
         conn.commit()
@@ -169,7 +203,7 @@ def analyze(photo_id: str):
         raise HTTPException(status_code=404, detail="Photo not found")
 
     image_path = UPLOAD_DIR / photo["filepath"]
-    result = analyze_image(image_path, photo["filename"])
+    result = analyze_image(image_path, photo["filename"], photo["user_comment"])
     analysis_id = str(uuid4())
     created_at = datetime.utcnow().isoformat()
 

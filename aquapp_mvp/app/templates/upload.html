@@ -6,6 +6,14 @@
   <form action="/upload" method="post" enctype="multipart/form-data">
     <label for="file">Choose a JPG or PNG file (max 10 MB)</label>
     <input type="file" name="file" id="file" accept="image/jpeg,image/png" required />
+    <label for="comment">Comment or question (optional)</label>
+    <textarea
+      name="comment"
+      id="comment"
+      rows="3"
+      maxlength="1000"
+      placeholder="Add context for the analysis..."
+    >{{ comment }}</textarea>
     {% if error %}
       <p class="error">{{ error }}</p>
     {% endif %}

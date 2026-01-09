@@ -6,6 +6,9 @@
   <img class="full" src="/uploads/{{ photo.filepath }}" alt="Photo {{ photo.filename }}" />
   <p><strong>Uploaded:</strong> {{ photo.created_at }}</p>
   <p><strong>Filename:</strong> {{ photo.filename }}</p>
+  {% if photo.user_comment %}
+    <p><strong>Comment:</strong> {{ photo.user_comment }}</p>
+  {% endif %}
   <form action="/photo/{{ photo.id }}/analyze" method="post">
     <button class="button" type="submit">Analyze this photo</button>
   </form>

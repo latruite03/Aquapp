@@ -5,13 +5,16 @@ import json
 import logging
 import os
 import re
+from functools import lru_cache
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from openai import OpenAI
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 SYSTEM_PROMPT = (
     "You are an aquarium observation assistant. Be cautious. "
@@ -41,6 +44,16 @@ class AnalysisResult:
     error_message: str | None = None
 
 
+@lru_cache
+def _ensure_env_loaded() -> Path | None:
+    candidates = [BASE_DIR / ".env", BASE_DIR.parent / ".env"]
+    for path in candidates:
+        if path.is_file():
+            load_dotenv(dotenv_path=path, override=False)
+            return path
+    return None
+
+
 def _extract_json(text: str) -> dict[str, Any] | None:
     try:
         return json.loads(text)
@@ -54,8 +67,14 @@ def _extract_json(text: str) -> dict[str, Any] | None:
             return None
 
 
-def analyze_image(image_path: Path, filename: str) -> AnalysisResult:
+def analyze_image(image_path: Path, filename: str, comment: str | None = None) -> AnalysisResult:
+    env_path = _ensure_env_loaded()
+    if env_path:
+        logger.info("Loaded env from %s", env_path)
+    else:
+        logger.warning("No .env found in %s or %s", BASE_DIR, BASE_DIR.parent)
     api_key = os.getenv("OPENAI_API_KEY")
+    logger.info("OPENAI_API_KEY loaded: %s", "yes" if api_key else "no")
     if not api_key:
         message = "Configure OPENAI_API_KEY to enable analysis."
         return AnalysisResult(
@@ -73,21 +92,24 @@ def analyze_image(image_path: Path, filename: str) -> AnalysisResult:
         mime_type = "image/jpeg" if filename.lower().endswith((".jpg", ".jpeg")) else "image/png"
         client = OpenAI(api_key=api_key, timeout=20)
         logger.info("Sending image %s to OpenAI model %s", filename, model)
+        content: list[dict[str, Any]] = [{"type": "text", "text": USER_PROMPT}]
+        if comment and comment.strip():
+            content.append(
+                {"type": "text", "text": f"User comment/question: {comment.strip()}"}
+            )
+        content.append(
+            {
+                "type": "image_url",
+                "image_url": {"url": f"data:{mime_type};base64,{encoded}"},
+            }
+        )
         response = client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {
                     "role": "user",
-                    "content": [
-                        {"type": "text", "text": USER_PROMPT},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:{mime_type};base64,{encoded}"
-                            },
-                        },
-                    ],
+                    "content": content,
                 },
             ],
         )

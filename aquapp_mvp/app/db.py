@@ -16,6 +16,11 @@ def get_connection() -> sqlite3.Connection:
     return conn
 
 
+def _column_exists(conn: sqlite3.Connection, table: str, column: str) -> bool:
+    rows = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    return any(row["name"] == column for row in rows)
+
+
 def init_db() -> None:
     conn = get_connection()
     try:
@@ -27,7 +32,8 @@ def init_db() -> None:
                 source TEXT,
                 filename TEXT,
                 filepath TEXT,
-                content_type TEXT
+                content_type TEXT,
+                user_comment TEXT
             );
             CREATE TABLE IF NOT EXISTS analyses (
                 id TEXT PRIMARY KEY,
@@ -41,6 +47,8 @@ def init_db() -> None:
             );
             """
         )
+        if not _column_exists(conn, "photos", "user_comment"):
+            conn.execute("ALTER TABLE photos ADD COLUMN user_comment TEXT")
         conn.commit()
         logger.info("Database initialized at %s", DB_PATH)
     finally:
